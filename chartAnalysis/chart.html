@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        CHART
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+</head>
+<body>
+    <canvas id="myChart"></canvas>
+    <canvas id="myChart2"></canvas>
+    <canvas id="myChart4"></canvas>
+    <canvas id="myChart3"></canvas>
+    <script>
+        //Fetch data
+        let populationData = null;
+        let creatures = []
+
+        //Changer default data_____________________________
+        const defaultData = 'projetFini/predSim3.json';
+        //_________________________________________________database\projetFini\interestingPlantStuff.json
+        let chosenData = "";
+        var myInit = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+              },
+            mode: "cors",
+            cache: "default"
+        };
+        let request = new Request(`../database/${defaultData}`,myInit)
+        fetch(request).then(function(res){
+            return res.json()
+        }).then(function(data){
+            console.log(data)
+            populationData = data;
+            setChart()
+        });
+
+        let ctx;
+        let chart;
+        function setChart(){
+            let labels = [];
+            for(let creature in populationData){
+                creatures.push(populationData[creature]);
+                labels.push(creature)
+            }
+            //console.log(labels)
+            ctx = document.getElementById('myChart').getContext('2d');
+            chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'line',
+            
+                // The data for our dataset
+                data: {
+                   
+                    labels: creatures[0].population.map((value,index)=>{return String(index*2.5)}),//['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                     datasets: [{
+                        label: 'Plantes',
+                        //backgroundColor: 'rgb(255, 99, 132)',
+                        fill: false,
+                        borderColor: creatures[0].color,
+                        data: creatures[0].population
+                    }]
+                    
+                },
+            
+                // Configuration options go here
+                options: {
+                    scales: {
+                        yAxes: [{
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Population'
+                          }
+                        }],
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Temps (sec)'
+                              }
+                        }]
+                      }     
+                }
+            }); 
+            let animalDataSet = creatures.map((value,index)=>{
+                    return {
+                    label: labels[index],
+                    fill: false,
+                    borderColor: value.color,
+                    data: value.population
+
+            }});
+            let datasets2 = creatures[0].population.map((value,index)=>{return String(index*2.5)})
+            //____________________
+            let maxLength = Infinity; //180
+            //_____________________
+            console.log(animalDataSet)
+            let eraseIndexes  = [];
+            for(let i=0;i<animalDataSet.length;i++){
+                if(labels[i]=="plants"||labels[i]=="organic_waste"||labels[i]=="inorganic_nutrients"){
+                    eraseIndexes.push(i);
+                    continue;
+                    
+                }
+                if(animalDataSet[i].label=="fox"){
+                    animalDataSet[i].label="Renards x 15";
+                    animalDataSet[i].data = animalDataSet[i].data.map(value=>value*15)
+                }else if(animalDataSet[i].label=="rabbits"){
+                    animalDataSet[i].label="Lapins Blancs";
+                }else if(animalDataSet[i].label=="blackRabbits"){
+                    animalDataSet[i].label="Lapins Noirs";
+                }
+                //Limit
+                while(animalDataSet[i].data.length>maxLength){
+                    animalDataSet[i].data.pop()
+                }
+            
+            }
+            while(datasets2.length>maxLength){
+                datasets2.pop()
+            }
+
+            for(let i=0;i<eraseIndexes.length;i++){
+                animalDataSet.splice(eraseIndexes[i]-i,1)
+            }
+
+            let ctx2 = document.getElementById('myChart2').getContext('2d');
+            let chart2 = new Chart(ctx2, {
+                // The type of chart we want to create
+                type: 'line',
+            
+                // The data for our dataset
+                data: {
+                   
+                    labels: datasets2,//['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                    datasets: animalDataSet
+                    
+                },
+            
+                // Configuration options go here
+                options: {
+                    scales: {
+                        yAxes: [{
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Population'
+                          }
+                        }],
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Temps (sec)'
+                              }
+                        }]
+                      }     
+                }
+            }); 
+        
+            let foxDataSet = [];
+            for(let label of labels){
+                if(label=="fox"){
+                    foxDataSet.push(
+                        {
+                            label: "Renards",
+                            fill: false,
+                            borderColor: populationData[label].color,
+                            data: populationData[label].population
+        
+                    }
+                    )
+                    
+                }
+            }
+            
+    
+            let ctx4 = document.getElementById('myChart4').getContext('2d');
+                let chart4 = new Chart(ctx4, {
+                    // The type of chart we want to create
+                    type: 'line',
+                
+                    // The data for our dataset
+                    data: {
+                       
+                        labels: creatures[0].population.map((value,index)=>{return String(index*2.5)}),//['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                        datasets: foxDataSet
+                        
+                    },
+                
+                    // Configuration options go here
+                    options: {
+                        scales: {
+                            yAxes: [{
+                              scaleLabel: {
+                                display: true,
+                                labelString: 'Population'
+                              }
+                            }],
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Temps (sec)'
+                                  }
+                            }]
+                          }     
+                    }
+                }); 
+            
+
+
+
+        let lifeCycleDataSet = [];
+        for(let label of labels){
+            if(label=="organic_waste"){
+                lifeCycleDataSet.push(
+                    {
+                        label: "Déchets organiques",
+                        fill: false,
+                        borderColor: populationData[label].color,
+                        data: populationData[label].count
+    
+                }
+                )
+                
+            }
+            if(label=="inorganic_nutrients"){
+                lifeCycleDataSet.push(
+                    {
+                        label: "Matière inorganique",
+                        fill: false,
+                        borderColor: populationData[label].color,
+                        data: populationData[label].count
+    
+                })
+            }
+
+        }
+
+        let ctx3 = document.getElementById('myChart3').getContext('2d');
+            let chart3 = new Chart(ctx3, {
+                // The type of chart we want to create
+                type: 'line',
+            
+                // The data for our dataset
+                data: {
+                   
+                    labels: creatures[0].population.map((value,index)=>{return String(index*2.5)}),//['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                    datasets: lifeCycleDataSet
+                    
+                },
+            
+                // Configuration options go here
+                options: {
+                    scales: {
+                        yAxes: [{
+                          scaleLabel: {
+                            display: true,
+                            labelString: 'Quantité'
+                          }
+                        }],
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Temps (sec)'
+                              }
+                        }]
+                      }     
+                }
+            }); 
+        }
+    </script>
+</body>
+</html>

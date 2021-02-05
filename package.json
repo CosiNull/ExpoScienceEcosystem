@@ -1,0 +1,19 @@
+{
+  "name": "ecosystem",
+  "version": "1.0.0",
+  "description": "Ecosystem simulation server",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "scripts": {
+    "nodemon": "nodemon server.js",
+    "start": "node server.js"
+    
+  },
+  "author": "",
+  "license": "ISC"
+}
